@@ -79,35 +79,38 @@ if st.session_state.sorteio_realizado:
     # ==========================================
     st.divider()
     st.subheader("4. Finalizar e Enviar")
-    
 
-    # Só libera o botão de envio se o usuário ranqueou todas
+    # Só libera o botão de envio quando a pessoa ranquear TODAS as barragens sorteadas
     if len(ranking) == qtd:
         if st.button("Enviar Avaliação", type="primary"):
             
-            # 1. Prepara o texto do ranking (Ex: 1º Barragem 010 | 2º Barragem 002)
+            # 1. Prepara o texto do ranking (Ex: 1º 24206 | 2º 35208)
             texto_ranking = " | ".join([f"{i+1}º {b}" for i, b in enumerate(ranking)])
             
-            # 2. Configura a URL e os Dados do Formulário
+            # 2. Configura a URL e os Dados do Formulário (Envia "Anônimo" no campo de nome)
             url_form = "https://docs.google.com/forms/d/e/1FAIpQLSfjKdWMmwLk4Z_P6fWFghLngJgs_cIOpot4jdFGZrF43dg_Hw/formResponse"
             
             dados = {
-                "entry.461828907": nome_voluntario,
+                "entry.461828907": "Anônimo",
                 "entry.1313851568": texto_ranking
             }
             
-            # 3. Envia os dados silenciosamente para o Google Sheets via Google Forms
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+            }
+            
+            # 3. Envia os dados
             try:
-                resposta = requests.post(url_form, data=dados)
+                resposta = requests.post(url_form, data=dados, headers=headers)
                 
-                st.balloons()
-                st.success("Avaliação enviada com sucesso! Muito obrigado pela ajuda.")
-                
-                # Limpa o estado para o voluntário poder sortear novas barragens
-                st.session_state.sorteio_realizado = False
+                if resposta.status_code == 200:
+                    st.balloons()
+                    st.success("Avaliação enviada com sucesso! Muito obrigado pela ajuda.")
+                    st.session_state.sorteio_realizado = False
+                else:
+                    st.error(f"Erro ao salvar dados (Código: {resposta.status_code}).")
                 
             except Exception as e:
-                st.error("Houve um erro de conexão. Tente novamente.")
-                
-    elif len(ranking) == qtd and not nome_voluntario:
-        st.warning("Por favor, digite seu nome acima para liberar o botão de envio.")
+                st.error(f"Houve um erro de conexão: {e}")
+    else:
+        st.info("Selecione todas as barragens no ranking acima para liberar o botão de envio.")
