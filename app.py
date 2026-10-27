@@ -73,17 +73,42 @@ if st.session_state.sorteio_realizado:
             else:
                 st.warning(f"{i+1}º - {nome_barragem}")
 
-    # ==========================================
+# ==========================================
     # PASSO C: ENVIO DOS DADOS
     # ==========================================
-    # Só libera o botão de envio se o usuário ranqueou todas as barragens sorteadas
-    if len(ranking) == qtd:
+    st.divider()
+    st.subheader("4. Finalizar e Enviar")
+    
+    # Adicionamos um campo para saber quem avaliou
+    nome_voluntario = st.text_input("Qual é o seu nome?")
+
+    # Só libera o botão de envio se o usuário ranqueou todas e preencheu o nome
+    if len(ranking) == qtd and nome_voluntario:
         if st.button("Enviar Avaliação", type="primary"):
-            # Aqui entraria a lógica para salvar no Google Sheets ou Banco de Dados
-            # Ex: salvar_no_banco(usuario, ranking)
             
-            st.balloons()
-            st.success("Avaliação enviada com sucesso! Muito obrigado pela ajuda.")
+            # 1. Prepara o texto do ranking (Ex: 1º Barragem 010 | 2º Barragem 002)
+            texto_ranking = " | ".join([f"{i+1}º {b}" for i, b in enumerate(ranking)])
             
-            # Limpa o estado para permitir uma nova avaliação
-            st.session_state.sorteio_realizado = False
+            # 2. Configura a URL e os Dados do Formulário
+            url_form = "https://docs.google.com/forms/d/e/1FAIpQLSfjKdWMmwLk4Z_P6fWFghLngJgs_cIOpot4jdFGZrF43dg_Hw/formResponse"
+            
+            dados = {
+                "entry.461828907": nome_voluntario,
+                "entry.1313851568": texto_ranking
+            }
+            
+            # 3. Envia os dados silenciosamente para o Google Sheets via Google Forms
+            try:
+                resposta = requests.post(url_form, data=dados)
+                
+                st.balloons()
+                st.success("Avaliação enviada com sucesso! Muito obrigado pela ajuda.")
+                
+                # Limpa o estado para o voluntário poder sortear novas barragens
+                st.session_state.sorteio_realizado = False
+                
+            except Exception as e:
+                st.error("Houve um erro de conexão. Tente novamente.")
+                
+    elif len(ranking) == qtd and not nome_voluntario:
+        st.warning("Por favor, digite seu nome acima para liberar o botão de envio.")
