@@ -99,11 +99,13 @@ if st.session_state.sorteio_realizado:
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
             }
             
-            # 3. Envia os dados
+            # 3. Envia os dados silenciosamente
             try:
-                resposta = requests.post(url_form, data=dados, headers=headers)
+                # O parâmetro allow_redirects=True garante que o Python segue a confirmação do Forms
+                resposta = requests.post(url_form, data=dados, headers=headers, allow_redirects=True)
                 
-                if resposta.status_code == 200:
+                # Códigos 200 (OK) e 302 (Redirecionamento) indicam sucesso no envio do Google Forms
+                if resposta.status_code in [200, 302]:
                     st.balloons()
                     st.success("Avaliação enviada com sucesso! Muito obrigado pela ajuda.")
                     st.session_state.sorteio_realizado = False
