@@ -43,6 +43,7 @@ if st.session_state.sorteio_realizado:
     st.subheader("2. Material de Apoio e Fichas")
     st.markdown("[📘 **Clique aqui para ler o Manual de Classificação**](https://drive.google.com/file/d/10p8Z2BRxSa1o03oPqhKkvScYju3kmAY5/view?usp=drive_link)")
     st.write("Abaixo estão as fichas das barragens sorteadas para você. Abra os links para analisar:")
+    st.info("💡 **Nota:** As informações contendo 'valor provável' e 'categoria mais provável' eram desconhecidas e foram obtidas por ajuste.")
     
     # Exibe as barragens sorteadas e seus links
     for index, row in st.session_state.barragens_sorteadas.iterrows():
