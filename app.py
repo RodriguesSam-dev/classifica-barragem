@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import random
+import requests
 
 # Configuração da página
 st.set_page_config(page_title="Ranking de Barragens", layout="centered")
